@@ -10,6 +10,94 @@ const outputPath = path.join(OUTPUT_DIR, "team.html");
 
 const render = require("./lib/htmlRenderer");
 
+// create database for new employees and team
+const teamDb = []
+
+function start(){
+  inquirer
+    .prompt([
+        {
+        type: 'input',
+        message: "What is your name?",
+        name: 'name'
+    },{
+        type: 'input',
+        message: "What is your ID number?",
+        name: 'id'
+    },{
+        type: 'input',
+        message: "What is your email?",
+        name: 'email'
+    },{
+        type: "list",
+        message: "What is your role?",
+        name: 'role',
+        choices: [
+            "Manager",
+            "Engineer",
+            "Intern"
+        ]
+    }
+]).then(userChoice => {
+    switch (userChoice.role) {
+        case "Manager":
+            newManager();
+            break;
+
+        case "Engineer":
+            newEngineer();
+            break;
+
+        case "Intern":
+            addIntern();
+            break
+
+    }
+})
+
+function newManager(){
+    inquirer
+        .prompt([
+            {
+                type: "input",
+                message: "What is your office number?",
+                name: "officeNumber"
+            }
+]).then(userChoice => {
+    console.log(userChoice);
+
+    const manager = new Manager(userChoice.name, userChoice.id, userChoice.email, userChoice.officeNumber)
+    
+    teamDb.push(manager)
+
+    start();
+}) 
+}
+
+function newEngineer() {
+    inquirer
+        .prompt([{
+            type: "input",
+            message: "What is your Github username?",
+            name: 'github'
+        }
+]).then(userChoice => {
+    console.log(userChoice);
+
+    const engineer = new Engineer(userChoice.name, userChoice.id, userChoice.email, userChoice.github)
+    teamDb.push(engineer)
+    start();
+})
+
+
+
+
+}
+
+    // inquirer.prompt(Questions)
+
+
+
 
 // Write code to use inquirer to gather information about the development team members,
 // and to create objects for each team member (using the correct classes as blueprints!)
@@ -32,4 +120,5 @@ const render = require("./lib/htmlRenderer");
 // and Intern classes should all extend from a class named Employee; see the directions
 // for further information. Be sure to test out each class and verify it generates an
 // object with the correct structure and methods. This structure will be crucial in order
-// for the provided `render` function to work! ```
+// for the provided `render` function to work}
+}
