@@ -10,115 +10,218 @@ const outputPath = path.join(OUTPUT_DIR, "team.html");
 
 const render = require("./lib/htmlRenderer");
 
+
 // create database for new employees and team
 const teamDb = []
 
-function start(){
-  inquirer
-    .prompt([
-        {
-        type: 'input',
-        message: "What is your name?",
-        name: 'name'
-    },{
-        type: 'input',
-        message: "What is your ID number?",
-        name: 'id'
-    },{
-        type: 'input',
-        message: "What is your email?",
-        name: 'email'
-    },{
-        type: "list",
-        message: "What is your role?",
-        name: 'role',
-        choices: [
-            "Manager",
-            "Engineer",
-            "Intern"
-        ]
+// begins the questions
+
+
+// starts the funciton and asked for first question
+const start = () => {
+    inquirer
+        .prompt(
+            {
+                type: "list",
+                message: "What is the employee's role?",
+                name: 'role',
+                choices: [
+                    "Manager",
+                    "Engineer",
+                    "Intern"
+                ]
+            }
+        )
+        // picks the next question based on the response below
+        .then(res => {
+            switch (res.role) {
+                case 'Manager':
+                    newManager();
+                    break;
+                case 'Engineer':
+                    newEngineer();
+                    break;
+                case 'Intern':
+                    newIntern();
+                    break;
+            }
+        });
+
+}
+// ensure users enter all quetions, and blocks are users from not doing so
+const validateInput = (input) => {
+    if (!input) {
+        return false;
+    } else {
+        return true;
     }
-]).then(userChoice => {
-    switch (userChoice.role) {
-        case "Manager":
-            newManager();
-            break;
+}
 
-        case "Engineer":
-            newEngineer();
-            break;
-
-        case "Intern":
-            addIntern();
-            break
-
-    }
-})
-
-function newManager(){
+// asking questions 
+const newManager = () => {
     inquirer
         .prompt([
             {
-                type: "input",
-                message: "What is your office number?",
-                name: "officeNumber"
+                type: 'input',
+                message: "What is employee's name?",
+                name: 'name',
+                validate: validateInput
+            }, {
+                type: 'input',
+                message: "What is the employee ID number?",
+                name: 'id',
+                validate: validateInput,
+
+            }, {
+                type: 'input',
+                message: "What is your email?",
+                name: 'email',
+                validate: validateInput,
+            }, {
+                type: 'number',
+                name: 'officeNumber',
+                message: 'What is their office number?',
+                validate: validateInput,
             }
-]).then(userChoice => {
-    console.log(userChoice);
+        ])
+        .then(res => {
 
-    const manager = new Manager(userChoice.name, userChoice.id, userChoice.email, userChoice.officeNumber)
-    
-    teamDb.push(manager)
+            const createManager = new Manager(
+                res.name,
+                res.id,
+                res.email,
+                res.officeNumber,
 
-    start();
-}) 
-}
+            );
+            teamDb.push(createManager);
+            //display creation of
+            console.log(`You have created ${res.name} as a new Manager!`);
 
-function newEngineer() {
+            finishTeam();
+        });
+};
+
+// asking questions for the enginner 
+const newEngineer = () => {
     inquirer
-        .prompt([{
-            type: "input",
-            message: "What is your Github username?",
-            name: 'github'
-        }
-]).then(userChoice => {
-    console.log(userChoice);
+        .prompt([
+            {
+                type: 'input',
+                name: 'name',
+                message: 'What is employees name?',
+                validate: validateInput
+            },
+            {
+                type: 'input',
+                name: 'id',
+                message: 'Enter employee id:',
+                validate: validateInput
+            }, {
+                type: 'input',
+                name: 'email',
+                message: 'add valid work email',
+                validate: validateInput
+            }, {
+                type: 'input',
+                name: 'github',
+                message: 'what is employee github username?',
+                validate: validateInput
+            }
+        ])
+        .then(res => {
+            const createEngineer = new Engineer(
+                res.name,
+                res.id,
+                res.email,
+                res.github,
+            );
 
-    const engineer = new Engineer(userChoice.name, userChoice.id, userChoice.email, userChoice.github)
-    teamDb.push(engineer)
-    start();
-})
+            teamDb.push(createEngineer);
+            // confirm the additon of new enginner
+            console.log(`You have queued ${res.name} as a new Enginner!`);
+
+            finishTeam();
+        });
+};
+
+// asking questions for the intern
+const newIntern = () => {
+    inquirer
+        .prompt([
+            {
+                type: 'input',
+                message: "What is the Intern's name?",
+                name: 'name',
+                validate: validateInput
+            }, {
+                type: 'input',
+                message: "What is the interns ID number?",
+                name: 'id',
+                validate: validateInput,
+
+            }, {
+                type: 'input',
+                message: "What is the interns company email?",
+                name: 'email',
+                validate: validateInput,
+            }, {
+                type: 'input',
+                name: 'school',
+                message: 'What school does he/she  attend?',
+                validate: validateInput,
+            }
+        ])
+        .then(res => {
+            const createIntern = new Intern(
+                res.name,
+                res.id,
+                res.email,
+                res.school
+            );
+
+            teamDb.push(createIntern);
+
+            // display the creation of the intern
+            console.log(`You have created ${res.name} as a new Intern!`);
+
+            finishTeam();
+        });
+
+};
+
+// last steps to finish the questionaire and create the HTML
+// if finished the HTML will get created
+// if needed at add another teammember will go through the loop again
+const finishTeam = () => {
+    inquirer
+        .prompt(
+            {
+                type: 'list',
+                name: 'nextSteps',
+                message: 'Would you like to add another employee or stop?',
+                choices: [
+                    'Add another member',
+                    'Finished'
+                ]
+            }).then(function (userResponse) {
+                if (userResponse.nextSteps === 'Add another member') {
+                    start()
+                } else {
+                    const employeeHTML = render(teamDb)
+                    fs.writeFile(outputPath, employeeHTML, function () {  
+                        // show file has been created in the console
+                        console.log("you have succesful created a file")
+
+                    })
+                }
+            })
+        };
+
+// begins the questions for new employees
+start()
+        
 
 
 
 
-}
-
-    // inquirer.prompt(Questions)
-
-
-
-
-// Write code to use inquirer to gather information about the development team members,
-// and to create objects for each team member (using the correct classes as blueprints!)
-
-// After the user has input all employees desired, call the `render` function (required
-// above) and pass in an array containing all employee objects; the `render` function will
-// generate and return a block of HTML including templated divs for each employee!
-
-// After you have your html, you're now ready to create an HTML file using the HTML
-// returned from the `render` function. Now write it to a file named `team.html` in the
-// `output` folder. You can use the variable `outputPath` above target this location.
-// Hint: you may need to check if the `output` folder exists and create it if it
-// does not.
-
-// HINT: each employee type (manager, engineer, or intern) has slightly different
-// information; write your code to ask different questions via inquirer depending on
-// employee type.
-
-// HINT: make sure to build out your classes first! Remember that your Manager, Engineer,
-// and Intern classes should all extend from a class named Employee; see the directions
-// for further information. Be sure to test out each class and verify it generates an
-// object with the correct structure and methods. This structure will be crucial in order
-// for the provided `render` function to work}
-}
+        
